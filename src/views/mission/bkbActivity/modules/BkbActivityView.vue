@@ -12,9 +12,7 @@
   >
     <template>
       <div>
-
         <a-tabs default-active-key="1">
-
           <a-tab-pane key="1" tab="基础信息">
             <a-descriptions size="small" bordered :column="2">
               <a-descriptions-item label="活动名称">
@@ -35,13 +33,15 @@
               <a-descriptions-item label="状态">
                 {{ modal.status_dictText }}
               </a-descriptions-item>
+              <a-descriptions-item label="活动地址">
+                {{ modal.activitySite }}
+              </a-descriptions-item>
               <!--              <a-descriptions-item label="客户手机号">-->
               <!--                {{ modal.principal.length > 11 ? '-' : modal.principal }}-->
               <!--              </a-descriptions-item>-->
-              <a-descriptions-item label="备注">
+              <a-descriptions-item label="活动内容">
                 {{ modal.remark }}
               </a-descriptions-item>
-
             </a-descriptions>
           </a-tab-pane>
           <a-tab-pane v-if="visible1" key="2" tab="反馈列表">
@@ -49,7 +49,7 @@
               <a-descriptions-item label="负责人" span="24">
                 {{ modal.speakerId_dictText }}
               </a-descriptions-item>
-              <a-descriptions-item :label="modal.type === '20'?'宣讲时长':'直播时长'">
+              <a-descriptions-item :label="modal.type === '20' ? '宣讲时长' : '直播时长'">
                 {{ showDate(modal.startDate, modal.actualEndTime) }} 小时
               </a-descriptions-item>
               <a-descriptions-item label="评论人数">
@@ -59,18 +59,13 @@
             <!--       线下活动显示图片     -->
             <span v-if="modal.type === '20'">
               <a-divider orientation="left">图片</a-divider>
-                <img v-if="modal.imgUrl" :src="modal.imgUrl" width="100">
-                <span v-else>暂无图片</span>
+              <img v-if="modal.imgUrl" :src="modal.imgUrl" width="100" />
+              <span v-else>暂无图片</span>
             </span>
           </a-tab-pane>
           <a-tab-pane v-if="visible1" key="3" tab="评论">
-            <a-table
-              :dataSource="data"
-              :columns="columns"
-            ></a-table>
+            <a-table :dataSource="data" :columns="columns"></a-table>
           </a-tab-pane>
-
-
         </a-tabs>
       </div>
     </template>
@@ -78,7 +73,6 @@
 </template>
 
 <script>
-
 import { getAction } from '@api/manage'
 import moment from 'moment'
 
@@ -162,6 +156,4 @@ export default {
 }
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

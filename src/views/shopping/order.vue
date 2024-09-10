@@ -3,10 +3,11 @@
     <el-card>
       <el-form :inline="true" :model="dataForm" @keyup.enter.native="getDataList(this.page)">
         <el-form-item label="订单编号:">
-          <el-input v-model="dataForm.orderNumber" placeholder="订单编号" clearable></el-input>
+          <el-input v-model="dataForm.orderNumber" size="small" placeholder="订单编号" clearable></el-input>
         </el-form-item>
         <el-form-item label="下单时间:">
           <el-date-picker
+            size="small"
             v-model="dateRange"
             type="datetimerange"
             range-separator="至"
@@ -18,15 +19,17 @@
         </el-form-item>
         <el-form-item label="订单状态:">
           <template>
-            <el-select v-model="dataForm.status" clearable placeholder="请选择订单状态">
+            <el-select v-model="dataForm.status" size="small" clearable placeholder="请选择订单状态">
               <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value"> </el-option>
             </el-select>
           </template>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" icon="el-icon-search" size="small" @click="getDataList()">查询</el-button>
-          <el-button @click="showConsignmentInfo()" type="primary" size="small">导出待发货订单</el-button>
-          <el-button @click="getSoldExcel()" type="primary" size="small">导出兑换记录</el-button>
+          <!-- <el-button @click="showConsignmentInfo()" type="primary" size="small">导出待发货订单</el-button> -->
+          <!-- <el-button @click="getSoldExcel()" type="primary" size="small">导出兑换记录</el-button> -->
+          <el-button @click="dialogVisible = true" type="primary" size="small">导出信息</el-button>
+          <el-button @click="delivery()" type="primary" size="small">批量发货</el-button>
           <el-button @click="clearDatas()" size="small">清空</el-button>
         </el-form-item>
       </el-form>
@@ -120,7 +123,7 @@
         </div>
       </div>
       <!-- 空 -->
-      <div class="empty-tips">暂无数据</div>
+      <div class="empty-tips" v-if="dataList.length == 0">暂无数据</div>
       <el-pagination
         @size-change="sizeChangeHandle"
         @current-change="currentChangeHandle"
@@ -139,12 +142,44 @@
         @inputCallback="getWaitingConsignmentExcel"
       ></consignment-info>
     </el-card>
+    <div>
+      <el-dialog
+        :before-close="
+          () => {
+            radio = 0
+            dialogVisible = false
+          }
+        "
+        title="提示"
+        :visible.sync="dialogVisible"
+        width="20%"
+      >
+        <el-radio-group v-model="radio">
+          <el-radio :label="1">导出待发货清单</el-radio>
+          <el-radio :label="2">导出已发货清单</el-radio>
+        </el-radio-group>
+        <span slot="footer" class="dialog-footer">
+          <el-button
+            size="small"
+            @click="
+              () => {
+                radio = 0
+                dialogVisible = false
+              }
+            "
+            >取 消</el-button
+          >
+          <el-button size="small" type="primary" @click="exportOrder">确 定</el-button>
+        </span>
+      </el-dialog>
+    </div>
   </div>
 </template>
 
 <script>
 import AddOrUpdate from './orderInfo'
 import ConsignmentInfo from './consignment-info'
+import { MessageBox } from 'element-ui'
 export default {
   data() {
     return {
@@ -157,11 +192,11 @@ export default {
         // },
         {
           value: 0,
-          label: '待发货',
+          label: '待发货'
         },
         {
           value: 1,
-          label: '已发货',
+          label: '已发货'
         },
         // {
         //   value: 4,
@@ -169,8 +204,8 @@ export default {
         // },
         {
           value: 2,
-          label: '已完成',
-        },
+          label: '已完成'
+        }
         // {
         //   value: 6,
         //   label: '失败',
@@ -181,17 +216,19 @@ export default {
       page: {
         total: 0, // 总页数
         currentPage: 1, // 当前页数
-        pageSize: 10, // 每页显示多少条
+        pageSize: 10 // 每页显示多少条
       },
       dataListLoading: false,
       dataListSelections: [],
       addOrUpdateVisible: false,
       consignmentInfoVisible: false,
+      radio: '',
+      dialogVisible: false
     }
   },
   components: {
     AddOrUpdate,
-    ConsignmentInfo,
+    ConsignmentInfo
   },
   activated() {
     // this.getDataList(this.page)
@@ -200,6 +237,111 @@ export default {
     this.getDataList(this.page)
   },
   methods: {
+    //跳到页顶
+    scrollTop(selector) {
+      let element = (selector && document.querySelector(selector)) || window
+      element.scrollTo(0, 0)
+    },
+    delivery() {
+      MessageBox.confirm('是否将所有除“虚拟产品”外的订单状态修改为已发货状态？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          this.$httpShop({
+            url: this.$httpShop.adornUrl(`/order/order/allShipsAreShipped`),
+            method: 'get'
+          }).then(({ result }) => {
+            // this.$httpShop({
+            //   url: this.$httpShop.adornUrl(`/order/order/batchDelivery`),
+            //   method: 'put',
+            //   data: { deliveryOrderParams: result }
+            // }).then(({ data }) => {})
+            this.$messageE({
+              message: '修改成功',
+              type: 'success',
+              duration: 1500,
+              onClose: () => {
+                this.getDataList(this.page)
+              }
+            })
+          })
+        })
+        .catch(() => {})
+    },
+    exportOrder() {
+      if (this.radio === 1) {
+        this.$httpShop({
+          url: this.$httpShop.adornUrl('/order/order/outExcel'),
+          method: 'post',
+          // params: this.$httpShop.adornParams({
+          //   startTime: this.dateRange === null ? null : this.dateRange[0], // 开始时间
+          //   endTime: this.dateRange === null ? null : this.dateRange[1] // 结束时间
+          // }),
+          responseType: 'blob' // 解决文件下载乱码问题
+        }).then(({ data }) => {
+          var blob = new Blob([data], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8'
+          })
+          const fileName = '待发货清单.xls'
+          const elink = document.createElement('a')
+          if ('download' in elink) {
+            // 非IE下载
+            elink.download = fileName
+            elink.style.display = 'none'
+            elink.href = URL.createObjectURL(blob)
+            document.body.appendChild(elink)
+            elink.click()
+            URL.revokeObjectURL(elink.href) // 释放URL 对象
+            document.body.removeChild(elink)
+          } else {
+            // IE10+下载
+            navigator.msSaveBlob(blob, fileName)
+          }
+        })
+      } else if (this.radio === 2) {
+        this.$httpShop({
+          url: this.$httpShop.adornUrl('/order/order/shippedExcel'),
+          method: 'post',
+          // params: this.$httpShop.adornParams({
+          //   startTime: this.dateRange === null ? null : this.dateRange[0], // 开始时间
+          //   endTime: this.dateRange === null ? null : this.dateRange[1] // 结束时间
+          // }),
+          responseType: 'blob' // 解决文件下载乱码问题
+        }).then(({ data }) => {
+          var blob = new Blob([data], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8'
+          })
+          const fileName = '已发货清单.xls'
+          const elink = document.createElement('a')
+          if ('download' in elink) {
+            // 非IE下载
+            elink.download = fileName
+            elink.style.display = 'none'
+            elink.href = URL.createObjectURL(blob)
+            document.body.appendChild(elink)
+            elink.click()
+            URL.revokeObjectURL(elink.href) // 释放URL 对象
+            document.body.removeChild(elink)
+          } else {
+            // IE10+下载
+            navigator.msSaveBlob(blob, fileName)
+          }
+        })
+      } else if (!this.radio || this.radio == 0) {
+        this.$messageE({
+          type: 'warning',
+          message: '请选择导出的清单!'
+        })
+        return
+      }
+
+      // this.$messageE({
+      //   type: 'success',
+      //   message: '发货成功!'
+      // })
+    },
     // 获取数据列表
     getDataList(page, params, done) {
       page = page === undefined ? this.page : page
@@ -215,16 +357,17 @@ export default {
               orderNumber: this.dataForm.orderNumber,
               status: this.dataForm.status,
               startTime: this.dateRange === null ? null : this.dateRange[0], // 开始时间
-              endTime: this.dateRange === null ? null : this.dateRange[1], // 结束时间
+              endTime: this.dateRange === null ? null : this.dateRange[1] // 结束时间
             },
             params
           ),
           false
-        ),
+        )
       }).then(({ result }) => {
         this.dataList = result.records
         this.page.total = result.total
         this.dataListLoading = false
+
         if (done) {
           done()
         }
@@ -245,6 +388,7 @@ export default {
     currentChangeHandle(val) {
       this.page.currentPage = val
       this.getDataList(this.page)
+      this.scrollTop()
     },
     // 多选
     selectionChangeHandle(val) {
@@ -262,19 +406,19 @@ export default {
     deleteHandle(id) {
       var ids = id
         ? [id]
-        : this.dataListSelections.map((item) => {
+        : this.dataListSelections.map(item => {
             return item.orderId
           })
       this.$confirm(`确定进行[${id ? '删除' : '批量删除'}]操作?`, '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
-        type: 'warning',
+        type: 'warning'
       })
         .then(() => {
           this.$httpShop({
             url: this.$httpShop.adornUrl(`/prod/spec/${ids}`),
             method: 'delete',
-            data: this.$httpShop.adornData(ids, false),
+            data: this.$httpShop.adornData(ids, false)
           }).then(({ data }) => {
             this.$messageE({
               message: '操作成功',
@@ -282,7 +426,7 @@ export default {
               duration: 1500,
               onClose: () => {
                 this.getDataList(this.page)
-              },
+              }
             })
           })
         })
@@ -303,12 +447,12 @@ export default {
           consignmentMobile: consignmentInfo.consignmentMobile,
           consignmentAddr: consignmentInfo.consignmentAddr,
           startTime: this.dateRange === null ? null : this.dateRange[0], // 开始时间
-          endTime: this.dateRange === null ? null : this.dateRange[1], // 结束时间
+          endTime: this.dateRange === null ? null : this.dateRange[1] // 结束时间
         }),
-        responseType: 'blob', // 解决文件下载乱码问题
+        responseType: 'blob' // 解决文件下载乱码问题
       }).then(({ data }) => {
         var blob = new Blob([data], {
-          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8',
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8'
         })
         const fileName = '待发货信息整理.xls'
         const elink = document.createElement('a')
@@ -333,12 +477,12 @@ export default {
         method: 'get',
         params: this.$httpShop.adornParams({
           startTime: this.dateRange === null ? null : this.dateRange[0], // 开始时间
-          endTime: this.dateRange === null ? null : this.dateRange[1], // 结束时间
+          endTime: this.dateRange === null ? null : this.dateRange[1] // 结束时间
         }),
-        responseType: 'blob', // 解决文件下载乱码问题
+        responseType: 'blob' // 解决文件下载乱码问题
       }).then(({ data }) => {
         var blob = new Blob([data], {
-          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8',
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8'
         })
         const fileName = '销售信息整理.xls'
         const elink = document.createElement('a')
@@ -356,8 +500,8 @@ export default {
           navigator.msSaveBlob(blob, fileName)
         }
       })
-    },
-  },
+    }
+  }
 }
 </script>
 <style lang="less">

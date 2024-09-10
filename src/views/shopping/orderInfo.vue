@@ -249,32 +249,32 @@ export default {
         dvyTime: '',
         finallyTime: '',
         cancelTime: '',
-        userAddrOrder: {},
+        userAddrOrder: {}
       },
       // resourcesUrl: process.env.VUE_APP_RESOURCES_URL,
       resourcesUrl: '',
       addOrUpdateVisible: false,
       editVisible: false,
-      devyVisible: false,
+      devyVisible: false
     }
   },
   // props: [orderStatus],
   components: {
     AddOrUpdate,
     DevyAdd,
-    orderEdit,
+    orderEdit
   },
   watch: {
-    visible: function () {
+    visible: function() {
       if (!this.visible) {
         this.devyVisible = false
         this.addOrUpdateVisible = false
         this.editVisible = false
       }
-    },
+    }
   },
   computed: {
-    stepsStatus: function () {
+    stepsStatus: function() {
       if (this.dataForm.finallyTime) {
         return 4
       }
@@ -287,7 +287,7 @@ export default {
       if (this.dataForm.orderTime) {
         return 1
       }
-    },
+    }
   },
   methods: {
     init(orderNumber) {
@@ -301,7 +301,7 @@ export default {
         this.$httpShop({
           url: this.$httpShop.adornUrl(`/order/order/orderInfo/${this.dataForm.orderNumber}`),
           method: 'get',
-          params: this.$httpShop.adornParams(),
+          params: this.$httpShop.adornParams()
         }).then(({ result }) => {
           this.dataForm = result
         })
@@ -311,7 +311,7 @@ export default {
       this.$httpShop({
         url: this.$httpShop.adornUrl(`/order/order/orderInfo/${this.dataForm.orderNumber}`),
         method: 'get',
-        params: this.$httpShop.adornParams(),
+        params: this.$httpShop.adornParams()
       }).then(({ result }) => {
         this.dataForm = result
       })
@@ -320,9 +320,10 @@ export default {
     dataFormSubmit() {},
     // 发货
     changeOrder(orderNumber) {
+      console.log(this.dataForm)
       this.devyVisible = true
       this.$nextTick(() => {
-        this.$refs.devyAdd.init(orderNumber, this.dataForm.dvyId, this.dataForm.dvyFlowId)
+        this.$refs.devyAdd.init(orderNumber, this.dataForm.dvyId, this.dataForm.dvyFlowId, this.dataForm.hasDummy)
       })
     },
     // 修改备注
@@ -337,13 +338,19 @@ export default {
     changeEdit(orderNumber) {
       this.editVisible = true
       this.$nextTick(() => {
-        this.$refs.editAdd.init(orderNumber, this.dataForm.dvyId, this.dataForm.dvyFlowId)
+        this.$refs.editAdd.init(
+          orderNumber,
+          this.dataForm.dvyId,
+          this.dataForm.dvyFlowId,
+          this.dataForm.hasDummy,
+          this.dataForm.redeemCodes,
+          this.dataForm.remarksInformation
+        )
       })
-    },
-  },
+    }
+  }
 }
 </script>
-
 
 <style>
 .main {
@@ -541,6 +548,3 @@ export default {
   margin-right: 8px;
 }
 </style>
-
-
-

@@ -1,12 +1,12 @@
 <template>
-  <a-card :bordered='false'>
+  <a-card :bordered="false">
     <!-- 查询区域 -->
-    <div class='table-page-search-wrapper'>
-      <a-form layout='inline' @keyup.enter.native='searchQuery'>
-        <a-row :gutter='24'>
-          <a-col :xl='6' :lg='7' :md='8' :sm='24'>
-            <a-form-item label='活动名称'>
-              <a-input placeholder='请输入活动名称' v-model='queryParam.name'></a-input>
+    <div class="table-page-search-wrapper">
+      <a-form layout="inline" @keyup.enter.native="searchQuery">
+        <a-row :gutter="24">
+          <a-col :xl="6" :lg="7" :md="8" :sm="24">
+            <a-form-item label="活动名称">
+              <a-input placeholder="请输入活动名称" v-model="queryParam.name"></a-input>
             </a-form-item>
           </a-col>
 
@@ -17,24 +17,26 @@
           <!--                                 dictCode="bkb_speaker,name,id,id" />-->
           <!--            </a-form-item>-->
           <!--          </a-col>-->
-          <a-col :xl='6' :lg='7' :md='8' :sm='24'>
-            <a-form-item label='状态'>
-              <j-dict-select-tag placeholder='请选择状态' v-model='queryParam.status' dictCode='activity_status' />
+          <a-col :xl="6" :lg="7" :md="8" :sm="24">
+            <a-form-item label="状态">
+              <j-dict-select-tag placeholder="请选择状态" v-model="queryParam.status" dictCode="activity_status" />
             </a-form-item>
           </a-col>
-          <a-col :xl='6' :lg='7' :md='8' :sm='24'>
-            <a-form-item label='计划开始日期'>
-              <j-date placeholder='请选择计划开始日期'
-                      :show-time="{ format: 'HH:mm' }"
-                      date-format='YYYY-MM-DD HH:mm'
-                      v-model='queryParam.startDate'></j-date>
+          <!-- <a-col :xl="6" :lg="7" :md="8" :sm="24">
+            <a-form-item label="计划开始日期">
+              <j-date
+                placeholder="请选择计划开始日期"
+                :show-time="{ format: 'HH:mm' }"
+                date-format="YYYY-MM-DD HH:mm"
+                v-model="queryParam.startDate"
+              ></j-date>
             </a-form-item>
-          </a-col>
+          </a-col> -->
           <!--          </template>-->
-          <a-col :xl='6' :lg='7' :md='8' :sm='24'>
-            <span style='float: left;overflow: hidden;' class='table-page-search-submitButtons'>
-              <a-button type='primary' @click='searchQuery' icon='search'>查询</a-button>
-              <a-button type='primary' @click='searchReset' icon='reload' style='margin-left: 8px'>重置</a-button>
+          <a-col :xl="6" :lg="7" :md="8" :sm="24">
+            <span style="float: left;overflow: hidden;" class="table-page-search-submitButtons">
+              <a-button type="primary" @click="searchQuery" icon="search">查询</a-button>
+              <a-button type="primary" @click="searchReset" icon="reload" style="margin-left: 8px">重置</a-button>
               <!--              <a @click="handleToggleSearch" style="margin-left: 8px">-->
               <!--                {{ toggleSearchStatus ? '收起' : '展开' }}-->
               <!--                <a-icon :type="toggleSearchStatus ? 'up' : 'down'" />-->
@@ -47,131 +49,159 @@
     <!-- 查询区域-END -->
 
     <!-- 操作按钮区域 -->
-    <div class='table-operator'>
-      <a-button @click='handleAdd' type='primary' icon='plus'>新增</a-button>
-      <a-button type='primary' icon='download' @click="handleExportXls('bkb_activity')">导出</a-button>
-      <a-upload name='file' :showUploadList='false' :multiple='false' :headers='tokenHeader' :action='importExcelUrl'
-                @change='handleImportExcel'>
+    <div class="table-operator">
+      <a-button @click="handleAdd" type="primary" icon="plus">新增</a-button>
+      <a-button type="primary" icon="download" @click="handleExportXls('bkb_activity')">导出</a-button>
+      <a-upload
+        name="file"
+        :showUploadList="false"
+        :multiple="false"
+        :headers="tokenHeader"
+        :action="importExcelUrl"
+        @change="handleImportExcel"
+      >
         <!--        <a-button type="primary" icon="import">导入</a-button>-->
       </a-upload>
       <!-- 高级查询区域 -->
-      <j-super-query :fieldList='superFieldList' ref='superQueryModal'
-                     @handleSuperQuery='handleSuperQuery'></j-super-query>
-      <a-dropdown v-if='selectedRowKeys.length > 0'>
-        <a-menu slot='overlay'>
-          <a-menu-item key='1' @click='batchDel'>
-            <a-icon type='delete' />
+      <j-super-query
+        :fieldList="superFieldList"
+        ref="superQueryModal"
+        @handleSuperQuery="handleSuperQuery"
+      ></j-super-query>
+      <a-dropdown v-if="selectedRowKeys.length > 0">
+        <a-menu slot="overlay">
+          <a-menu-item key="1" @click="batchDel">
+            <a-icon type="delete" />
             删除
           </a-menu-item>
         </a-menu>
-        <a-button style='margin-left: 8px'> 批量操作
-          <a-icon type='down' />
+        <a-button style="margin-left: 8px">
+          批量操作
+          <a-icon type="down" />
         </a-button>
       </a-dropdown>
     </div>
 
     <!-- table区域-begin -->
     <div>
-      <div class='ant-alert ant-alert-info' style='margin-bottom: 16px;'>
-        <i class='anticon anticon-info-circle ant-alert-icon'></i> 已选择 <a
-        style='font-weight: 600'>{{ selectedRowKeys.length }}</a>项
-        <a style='margin-left: 24px' @click='onClearSelected'>清空</a>
+      <div class="ant-alert ant-alert-info" style="margin-bottom: 16px;">
+        <i class="anticon anticon-info-circle ant-alert-icon"></i> 已选择
+        <a style="font-weight: 600">{{ selectedRowKeys.length }}</a
+        >项
+        <a style="margin-left: 24px" @click="onClearSelected">清空</a>
       </div>
 
       <a-table
-        ref='table'
-        size='middle'
-        rowKey='id'
-        class='j-table-force-nowrap'
-        :scroll='{x:true}'
-        :columns='columns'
-        :dataSource='dataSource'
-        :pagination='ipagination'
-        :loading='loading'
-        :expandedRowKeys='expandedRowKeys'
-        @change='handleTableChange'
-        @expand='handleExpand'
-        v-bind='tableProps'>
-
-        <template slot='imgSlot' slot-scope='text,record'>
-          <span v-if='!text' style='font-size: 12px;font-style: italic;'>无图片</span>
-          <img v-else :src='getImgView(text)' :preview='record.id' height='25px' alt=''
-               style='max-width:80px;font-size: 12px;font-style: italic;' />
+        ref="table"
+        size="middle"
+        rowKey="id"
+        class="j-table-force-nowrap"
+        :scroll="{ x: true }"
+        :columns="columns"
+        :dataSource="dataSource"
+        :pagination="ipagination"
+        :loading="loading"
+        :expandedRowKeys="expandedRowKeys"
+        @change="handleTableChange"
+        @expand="handleExpand"
+        v-bind="tableProps"
+      >
+        <template slot="imgSlot" slot-scope="text, record">
+          <span v-if="!text" style="font-size: 12px;font-style: italic;">无图片</span>
+          <img
+            v-else
+            :src="getImgView(text)"
+            :preview="record.id"
+            height="25px"
+            alt=""
+            style="max-width:80px;font-size: 12px;font-style: italic;"
+          />
         </template>
 
-        <template slot='speakerId' slot-scope='text, record'>
-          <a-tag v-for="(action, index) in record.speakerId?record.speakerId.split(','):[]" :key='index'>
+        <template slot="speakerId" slot-scope="text, record">
+          <a-tag v-for="(action, index) in record.speakerId ? record.speakerId.split(',') : []" :key="index">
             {{ label(action) }}
           </a-tag>
         </template>
 
-        <template slot='fileSlot' slot-scope='text'>
-          <span v-if='!text' style='font-size: 12px;font-style: italic;'>无文件</span>
-          <a-button
-            v-else
-            :ghost='true'
-            type='primary'
-            icon='download'
-            size='small'
-            @click='downloadFile(text)'>
+        <template slot="fileSlot" slot-scope="text">
+          <span v-if="!text" style="font-size: 12px;font-style: italic;">无文件</span>
+          <a-button v-else :ghost="true" type="primary" icon="download" size="small" @click="downloadFile(text)">
             下载
           </a-button>
         </template>
 
-        <span slot='action' slot-scope='text, record'>
-<!--          <div v-if="record.portId === 'B'">-->
+        <span slot="action" slot-scope="text, record">
+          <!--          <div v-if="record.portId === 'B'">-->
           <!--              <span v-if="record.status === 20">-->
           <!--                <a @click="handleAddChild(record)">新增</a>-->
           <!--              </span>-->
           <!--          </div> -->
 
           <div>
-              <span v-if='username===record.createBy'>
-                <a @click='handleEdit(record)'>编辑</a>
-                <a-divider type='vertical' />
-              </span>
-              <span v-if='username===record.createBy && record.portId === "B" && record.status === 30'>
-                <a-popconfirm title='确定要下发任务吗?' @confirm='() => sendActivity(record)' placement='topLeft'>
-                  <a>下发</a>
-                </a-popconfirm>
-                <a-divider type='vertical' />
-              </span>
+            <span v-if="username === record.createBy">
+              <a @click="handleEdit(record)">编辑</a>
+              <a-divider type="vertical" />
+            </span>
+            <span v-if="username === record.createBy && record.portId === 'B' && record.status === 30">
+              <a-popconfirm title="确定要下发任务吗?" @confirm="() => sendActivity(record)" placement="topLeft">
+                <a>下发</a>
+              </a-popconfirm>
+              <a-divider type="vertical" />
+            </span>
 
-              <span>
-                    <a @click='view(record)'>详情</a>
-              </span>
+            <span> <a @click="view(record)">详情</a> </span>
+            <span v-if="record.portId === 'C' && record.phaseStatus === 0">
+              <a-divider type="vertical" />
+              <a @click="addStage(record)">新增阶段</a>
+            </span>
+            <span v-if="record.portId === 'C' && record.phaseStatus === 1">
+              <a-divider type="vertical" />
+              <a @click="viewStage(record)">阶段详情</a>
+            </span>
             <!--                <span>-->
             <!--                      <a @click='handleAddChild(record)'>添加下级</a>-->
             <!--                       <a-divider type='vertical' />-->
             <!--                </span>-->
             <!--                  <span v-if='record.status === 10'>-->
-                  <span v-if='username===record.createBy && record.portId === "B" && record.status === 30'>
-                                    <a-divider type='vertical' />
-                        <a-popconfirm title='确定删除吗?' @confirm='() => handleDeleteNode(record.id)'
-                                      placement='topLeft'>
-                          <a>删除</a>
-                        </a-popconfirm>
-                  </span>
+            <span v-if="username === record.createBy && record.portId === 'B' && record.status === 30">
+              <a-divider type="vertical" />
+              <a-popconfirm title="确定删除吗?" @confirm="() => handleDeleteNode(record.id)" placement="topLeft">
+                <a>删除</a>
+              </a-popconfirm>
+            </span>
           </div>
         </span>
-
       </a-table>
     </div>
-
-    <BkbActivityView ref='modalView'></BkbActivityView>
-    <bkbActivity-modal ref='modalForm' @ok='modalFormOk'></bkbActivity-modal>
+    <stageVue
+      ref="stage"
+      :showStage="showStage"
+      @closeStage="
+        () => {
+          showStage = false
+          searchReset()
+        }
+      "
+      :activeId="childId"
+      :formDisabled="formDisabled"
+      :stageModel="stageModel"
+    >
+    </stageVue>
+    <BkbActivityView ref="modalView"></BkbActivityView>
+    <bkbActivity-modal ref="modalForm" @ok="modalFormOk"></bkbActivity-modal>
   </a-card>
 </template>
 
 <script>
-
 import { deleteAction, getAction, postAction } from '@/api/manage'
 import { JeecgListMixin } from '@/mixins/JeecgListMixin'
 import BkbActivityModal from './modules/BkbActivityModal'
 import { filterObj } from '@/utils/util'
 import store from '@/store'
 import BkbActivityView from '@views/mission/bkbActivity/modules/BkbActivityView'
-
+import stageVue from './modules/stage.vue'
+import { Model } from 'echarts'
 const username = store.getters.userInfo.username
 
 export default {
@@ -179,10 +209,15 @@ export default {
   mixins: [JeecgListMixin],
   components: {
     BkbActivityModal,
-    BkbActivityView
+    BkbActivityView,
+    stageVue
   },
   data() {
     return {
+      stageModel: [],
+      formDisabled: true,
+      showStage: false,
+      childId: '',
       username,
       description: 'bkb_activity管理页面',
       // 表头
@@ -234,11 +269,16 @@ export default {
           dataIndex: 'speakerId',
           scopedSlots: { customRender: 'speakerId' }
         },
-        // {
-        //   title: '备注',
-        //   align: 'left',
-        //   dataIndex: 'remark'
-        // },
+        {
+          title: '活动内容',
+          align: 'left',
+          dataIndex: 'remark',
+          customRender: function(text) {
+            if (text && text.length > 20) {
+              return text.slice(0, 20) + '...'
+            } else return text
+          }
+        },
         {
           title: '操作',
           dataIndex: 'action',
@@ -260,7 +300,7 @@ export default {
         exportXlsUrl: '/mission/bkbActivity/exportXls',
         importExcelUrl: 'mission/bkbActivity/importExcel'
       },
-      tag_data: [],// 标签组
+      tag_data: [], // 标签组
       expandedRowKeys: [],
       hasChildrenField: 'hasChild',
       pidField: 'pid',
@@ -282,12 +322,28 @@ export default {
         // 列表项是否可选择
         rowSelection: {
           selectedRowKeys: _this.selectedRowKeys,
-          onChange: (selectedRowKeys) => _this.selectedRowKeys = selectedRowKeys
+          onChange: selectedRowKeys => (_this.selectedRowKeys = selectedRowKeys)
         }
       }
     }
   },
   methods: {
+    addStage(e) {
+      console.log(e)
+      this.childId = e.id
+      this.showStage = true
+      this.formDisabled = false
+    },
+    viewStage(e) {
+      console.log(e)
+      this.childId = e.id
+      this.showStage = true
+      this.formDisabled = true
+      getAction('/mission/bkbActivePhase/queryById', { id: e.id }).then(res => {
+        console.log(res)
+        this.stageModel = res.result
+      })
+    },
     loadData(arg) {
       if (arg == 1) {
         this.ipagination.current = 1
@@ -300,23 +356,25 @@ export default {
           this.tag_data = res.result
         }
       })
-      getAction(this.url.list, params).then(res => {
-        if (res.success) {
-          let result = res.result
-          if (Number(result.total) > 0) {
-            this.ipagination.total = Number(result.total)
-            this.dataSource = this.getDataByResult(res.result.records)
-            return this.loadDataByExpandedRows(this.dataSource)
+      getAction(this.url.list, params)
+        .then(res => {
+          if (res.success) {
+            let result = res.result
+            if (Number(result.total) > 0) {
+              this.ipagination.total = Number(result.total)
+              this.dataSource = this.getDataByResult(res.result.records)
+              return this.loadDataByExpandedRows(this.dataSource)
+            } else {
+              this.ipagination.total = 0
+              this.dataSource = []
+            }
           } else {
-            this.ipagination.total = 0
-            this.dataSource = []
+            this.$message.warning(res.message)
           }
-        } else {
-          this.$message.warning(res.message)
-        }
-      }).finally(() => {
-        this.loading = false
-      })
+        })
+        .finally(() => {
+          this.loading = false
+        })
     },
     view(record) {
       this.loadParent = true
@@ -326,17 +384,19 @@ export default {
     reception(record) {
       this.loadParent = true
       console.warn(record)
-      getAction(this.url.reception, { id: record.id }).then((res) => {
-        if (res.success) {
-          if (res.result.records) {
-            this.$message.success('接收活动成功!')
+      getAction(this.url.reception, { id: record.id })
+        .then(res => {
+          if (res.success) {
+            if (res.result.records) {
+              this.$message.success('接收活动成功!')
+            }
+          } else {
+            this.$message.warning('接收活动失败!')
           }
-        } else {
-          this.$message.warning('接收活动失败!')
-        }
-      }).finally(() => {
-        this.loadData()
-      })
+        })
+        .finally(() => {
+          this.loadData()
+        })
     },
     label(v) {
       this.tag_data.filter(value => {
@@ -366,7 +426,7 @@ export default {
               }
             }
             let childrenMap = listMap
-            let fn = (list) => {
+            let fn = list => {
               if (list) {
                 list.forEach(data => {
                   if (this.expandedRowKeys.includes(data.id)) {
@@ -429,11 +489,11 @@ export default {
       if (expanded) {
         this.expandedRowKeys.push(record.id)
         if (record.children.length > 0 && record.children[0].isLoading === true) {
-          let params = this.getQueryParams(1)//查询条件
+          let params = this.getQueryParams(1) //查询条件
           params[this.pidField] = record.id
           params.hasQuery = 'false'
           params.superQueryParams = ''
-          getAction(this.url.childList, params).then((res) => {
+          getAction(this.url.childList, params).then(res => {
             if (res.success) {
               if (res.result.records) {
                 record.children = this.getDataByResult(res.result.records)
@@ -466,16 +526,18 @@ export default {
         return
       }
       let that = this
-      postAction(that.url.sendActivity, value).then((res) => {
-        if (res.success) {
-          that.$message.success(res.message)
-          // that.loadData()
-        } else {
-          that.$message.error(res.message)
-        }
-      }).finally(() => {
-        that.loadData()
-      })
+      postAction(that.url.sendActivity, value)
+        .then(res => {
+          if (res.success) {
+            that.$message.success(res.message)
+            // that.loadData()
+          } else {
+            that.$message.error(res.message)
+          }
+        })
+        .finally(() => {
+          that.loadData()
+        })
     },
     handleDeleteNode(id) {
       if (!this.url.delete) {
@@ -483,7 +545,7 @@ export default {
         return
       }
       var that = this
-      deleteAction(that.url.delete, { id: id }).then((res) => {
+      deleteAction(that.url.delete, { id: id }).then(res => {
         if (res.success) {
           that.loadData(1)
         } else {
@@ -518,7 +580,7 @@ export default {
       fieldList.push({ type: 'string', value: 'activityTime', text: '活动时长', dictCode: '' })
       fieldList.push({ type: 'string', value: 'speakerId', text: '演讲员', dictCode: 'bkb_speaker,name,id' })
       fieldList.push({ type: 'int', value: 'status', text: '状态', dictCode: 'activity_status' })
-      fieldList.push({ type: 'Text', value: 'remark', text: '备注', dictCode: '' })
+      fieldList.push({ type: 'Text', value: 'remark', text: '活动内容', dictCode: '' })
       this.superFieldList = fieldList
     }
   }
